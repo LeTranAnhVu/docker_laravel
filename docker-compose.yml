@@ -1,0 +1,47 @@
+# recreate:  docker-compose up -d --force-recreate --build
+# restart: docker-compose restart
+# stop: docker-compose stop
+# start: docker-compose start
+# work with php artisan : docker exec -it c-php bash
+version: '3'
+#network
+
+services:
+  # php fpm
+  my-php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: c-php
+    volumes:
+      - .:/home/www/mysite
+    working_dir: /home/www/mysite
+
+  # web-server
+  my-httpd:
+    image: httpd:latest
+    container_name: c-httpd
+    volumes:
+      - .:/home/www/mysite
+      - ./docker/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./docker/httpd/hosts:/etc/hosts
+    ports:
+      - "8080:80"
+      - "443:443"
+    working_dir: /home/www/mysite
+
+  # database
+  my-sql:
+    image: mysql:5.7
+    container_name: c-mysql
+    restart: always
+    command: --disable-partition-engine-check
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: laravel
+    volumes:
+      - ./docker_db_storage:/var/lib/mysql
+    ports:
+      - "3306:3306"
