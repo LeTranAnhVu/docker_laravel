@@ -1,67 +1,35 @@
-# REQUIRE:
-- install `docker` : https://docs.docker.com/install/
-- install `composer`, `laravel`
-- **NO NEED**  to install `webserver`, `php`, as well as `mysql`
+# COMMAND
 
-
-# SPEC: 
-- Docker version `18.09.2`
-- Laravel Installer `2.0.1`
-- Composer version `1.8.5`
-- Laravel Framework `5.8.28`
-
-# PREPARE:
-
-- Create the empty folder `docker_db_storage`
-- Create `.env` file in root directory by duplicate the `.env-example`
-- **NOTICE:** `mysql` configure should like snippet below due to configure in `docker-compose.yml` at `mysql` service.
-
-```console
-DB_CONNECTION=mysql
-DB_HOST=c-mysql
-DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=admin
-DB_PASSWORD=password
+#### NETWORK
+- create network
+```
+ docker network create demo_nw
 ```
 
 
-# RUN:
-- Step 1: Build project:
-```console
-docker-compose up -d
+#### PHP
+- create php-fpm images
+```
+ docker build -t i-php ./docker/php  
+```
+- run php-fpm container
+```
+ docker run -d --name c-php -v "$PWD":/home/www/mysite --network demo_nw i-php
 ```
 
-- Step 2: **NOTE:** Access to work directory for `php artisan migrate` or something relate to the `database` 
-```console
-docker exec -it c-php bash
+#### HTTPD
+- run httpd container
+    - port 8080
+    - mount configure file to container
 ```
-Then:
-```console
-composer install
-php artisan key:generate
-php artisan migrate
-php artisan db:seed
+ docker run -d --name c-httpd -v "$PWD":/home/www/mysite -v "$PWD"/docker/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf -p 8080:80 --network demo_nw httpd
 ```
 
-- Step 3: Navigate bellow `url` to your browser: 
-```console
-localhost:8080
+#### MYSQL
+- run mysql container
+    - set env
+    - MYSQL_ROOT_PASSWORD = password
+    - MYSQL_DATABASE = docker_demo
 ```
-
-
-# Docker command:
-- Build project:
-```console
-docker-compose up -d
-```
-
-- Restart the project
-```console
-docker-compose restart
-```
-
-- Access to work directory for `php artisan migrate` or something relate which the `database` 
-```console
-docker exec -it c-php bash
+ docker run -d --name c-mysql -v "$PWD"/db_stg:/var/lib/mysql -p 3306:3306 --network demo_nw -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=docker_demo mysql:5.7
 ```

@@ -20,7 +20,7 @@ WORKDIR /
 RUN curl -s https://getcomposer.org/installer | php  && \
     mv composer.phar /usr/local/bin/composer && \
     chmod +x /usr/local/bin/composer
-    
+
 #install laravel
 #RUN composer global require laravel/installer
 
