@@ -40,7 +40,7 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_USER: admin
       MYSQL_PASSWORD: password
-      MYSQL_DATABASE: laravel
+      MYSQL_DATABASE: docker_demo
     volumes:
       - ./docker_db_storage:/var/lib/mysql
     ports:
